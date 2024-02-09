@@ -1,0 +1,22 @@
+{
+	"name": "test/deploy",
+	"description": "A WordPress site for the Test Deploy",
+	"require": {
+		"wpackagist-plugin/gutenberg": "^16.2"
+	},
+	"repositories": {
+		"wpackagist": {
+			"type": "composer",
+			"url": "https://wpackagist.org",
+			"only": [
+				"wpackagist-plugin/*",
+				"wpackagist-theme/*"
+			]
+		}
+	},
+	"config": {
+		"allow-plugins": {
+			"composer/installers": true
+		}
+	}
+}

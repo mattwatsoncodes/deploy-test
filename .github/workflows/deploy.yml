@@ -8,19 +8,6 @@ jobs:
     runs-on: ubuntu-latest
     name: Deploy with built assets to Pantheon
     steps:
-      - name: Setup PHP
-        uses: shivammathur/setup-php@v2
-        with:
-        php-version: '7.4'
-
-      - name: Install Terminus
-        uses: pantheon-systems/terminus-github-actions@main
-        with:
-        pantheon-machine-token: ${{ secrets.PANTHEON_MACHINE_KEY }}
-
-    - name: Install Terminus Plugin
-        run: terminus self:plugin:install terminus-rsync-plugin
-
       - name: Checkout this branch
         uses: actions/checkout@v3
         with:
@@ -51,9 +38,14 @@ jobs:
         run: |
           npm run build
 
+      - name: Authenticate with Pantheon codeserver repo
+        uses: webfactory/ssh-agent@v0.7.0
+        with:
+          ssh-private-key: ${{ secrets.PANTHEON_PRIVATE_KEY }}
+
       - name: Deploy built files
         run: |
           bash .github/workflows/update-built-branch.sh
         env:
-          PANTHEON_PROJECT_ID: 65401411-429a-476e-8dc8-4bd98e5d916
+          PANTHEON_PROJECT_ID: 65401411-429a-476e-8dc8-4bd98e5d9164
           PANTHEON_MACHINE_KEY: ${{ secrets.PANTHEON_MACHINE_KEY }}

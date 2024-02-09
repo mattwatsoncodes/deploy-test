@@ -36,8 +36,25 @@ else
     exit
 fi
 
+# Copy the built files from src repo over to the build repo
+# ---------------------------------------------------------
 
-terminus auth:login --machine-token=${PANTHEON_MACHINE_KEY}
-terminus rsync ./wp-content/themes/my-theme ${PANTHEON_PROJECT_ID}.dev:wp-content/themes/
+if ! command -v 'rsync'; then
+	APT_GET_PREFIX=''
+	if command -v 'sudo'; then
+		APT_GET_PREFIX='sudo'
+	fi
+
+	$APT_GET_PREFIX apt-get update
+	$APT_GET_PREFIX apt-get install -q -y rsync
+fi
 
 rsync --delete -a "${SRC_DIR}/" "${BUILD_DIR}" --exclude='.git/'
+
+cd ${BUILD_DIR}/wp-content/themes/
+# terminus auth:login --machine-token=${PANTHEON_MACHINE_KEY}
+rsync -rlIpz --info=progress2 --temp-dir=~/tmp --delay-updates --ipv4 --exclude=.git -e 'ssh -o "StrictHostKeyChecking=no" -p 2222' './my-theme' 'dev.65401411-429a-476e-8dc8-4bd98e5d9164@appserver.dev.65401411-429a-476e-8dc8-4bd98e5d9164.drush.in:code/wp-content/themes'
+# mkdir -p ~/.ssh/ && touch ~/.ssh/known_hosts
+# echo "[appserver.dev.${PANTHEON_PROJECT_ID}.drush.in]:2222" > ~/.ssh/known_hosts
+# ssh -tt -o StrictHostKeyChecking=no appserver.${DEPLOY_BRANCH}.${PANTHEON_PROJECT_ID}.drush.in
+# terminus rsync ./my-theme ${PANTHEON_PROJECT_ID}.${DEPLOY_BRANCH}:code/wp-content/themes -- --info=progress2

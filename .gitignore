@@ -1,6 +1,10 @@
+.DS_Store
+/vendor
+/node_modules
 /wp-admin
 /wp-includes
 /wp-content/uploads
+/wp-content/plugins
 /wp-content/themes/twentytwentyfour
 /wp-content/themes/twentytwentythree
 /wp-content/themes/twentytwentytwo
