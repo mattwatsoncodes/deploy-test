@@ -1,0 +1,59 @@
+name: Deploy to Pantheon after building assets
+
+on:
+  push:
+
+jobs:
+  deploy_job:
+    runs-on: ubuntu-latest
+    name: Deploy with built assets to Pantheon
+    steps:
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+        php-version: '7.4'
+
+      - name: Install Terminus
+        uses: pantheon-systems/terminus-github-actions@main
+        with:
+        pantheon-machine-token: ${{ secrets.PANTHEON_MACHINE_KEY }}
+
+    - name: Install Terminus Plugin
+        run: terminus self:plugin:install terminus-rsync-plugin
+
+      - name: Checkout this branch
+        uses: actions/checkout@v3
+        with:
+          persist-credentials: false
+          ref: ${{ github.ref_name }}
+          fetch-depth: 0
+
+      - name: Install PHP dependencies
+        uses: php-actions/composer@v6
+
+      - name: Cache node modules
+        uses: actions/cache@v3
+        env:
+          cache-name: cache-node-modules
+        with:
+          path: ~/.npm
+          key: ${{ runner.OS }}-build-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.OS }}-build-${{ env.cache-name }}-
+            ${{ runner.OS }}-build-
+            ${{ runner.OS }}-
+
+      - name: Install npm dependencies
+        run: |
+          npm ci --legacy-peer-deps
+
+      - name: Build assets
+        run: |
+          npm run build
+
+      - name: Deploy built files
+        run: |
+          bash .github/workflows/update-built-branch.sh
+        env:
+          PANTHEON_PROJECT_ID: 65401411-429a-476e-8dc8-4bd98e5d916
+          PANTHEON_MACHINE_KEY: ${{ secrets.PANTHEON_MACHINE_KEY }}
