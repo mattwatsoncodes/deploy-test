@@ -68,4 +68,7 @@ do
    rsync -rlIpz --info=progress2 --temp-dir=~/tmp --delay-updates --ipv4 --exclude=.git -e 'ssh -o "StrictHostKeyChecking=no" -p 2222' "./$i" "$DEPLOY_BRANCH.$PANTHEON_PROJECT_ID@appserver.$DEPLOY_BRANCH.$PANTHEON_PROJECT_ID.drush.in:code/wp-content/$FOLDER"
 done
 
-terminus env:commit --message "$PR_TITLE"
+terminus auth:login --machine-token=${PANTHEON_MACHINE_KEY}
+if $DEPLOY_BRANCH == "dev"; then
+  terminus env:commit --message "$PR_TITLE"
+fi
