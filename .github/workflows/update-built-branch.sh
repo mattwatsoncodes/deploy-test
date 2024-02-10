@@ -66,7 +66,7 @@ cd ${BUILD_DIR}/wp-content
 # done
 
 # rsync -rlIpz --info=progress2 --temp-dir=~/tmp --delay-updates --ipv4 --exclude=.git -e 'ssh -o "StrictHostKeyChecking=no" -p 2222' '.themes/my-theme' '${DEPLOY_BRANCH}.${PANTHEON_PROJECT_ID}@appserver.${DEPLOY_BRANCH}.${PANTHEON_PROJECT_ID}.drush.in:code/wp-content/themes'
-rsync -rlIpz --info=progress2 --temp-dir=~/tmp --delay-updates --ipv4 --exclude=.git -e 'ssh -o "StrictHostKeyChecking=no" -p 2222' '.themes/my-theme' '${DEPLOY_BRANCH}.65401411-429a-476e-8dc8-4bd98e5d9164@appserver.dev.65401411-429a-476e-8dc8-4bd98e5d9164.drush.in:code/wp-content/themes'
+rsync -rlIpz --info=progress2 --temp-dir=~/tmp --delay-updates --ipv4 --exclude=.git -e 'ssh -o "StrictHostKeyChecking=no" -p 2222' '.themes/my-theme' '"$DEPLOY_BRANCH".65401411-429a-476e-8dc8-4bd98e5d9164@appserver.dev.65401411-429a-476e-8dc8-4bd98e5d9164.drush.in:code/wp-content/themes'
 # mkdir -p ~/.ssh/ && touch ~/.ssh/known_hosts
 # echo "[appserver.dev.${PANTHEON_PROJECT_ID}.drush.in]:2222" > ~/.ssh/known_hosts
 # ssh -tt -o StrictHostKeyChecking=no appserver.${DEPLOY_BRANCH}.${PANTHEON_PROJECT_ID}.drush.in
