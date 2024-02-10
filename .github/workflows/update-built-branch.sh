@@ -70,5 +70,5 @@ done
 
 terminus auth:login --machine-token=${PANTHEON_MACHINE_KEY}
 if [ "$DEPLOY_BRANCH" = "dev" ]; then
-  terminus env:commit --message "$PR_TITLE"
+  terminus env:commit --message "$PR_TITLE" -- "$PANTHEON_PROJECT_ID.$DEPLOY_BRANCH"
 fi
