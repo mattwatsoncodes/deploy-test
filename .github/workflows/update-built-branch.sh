@@ -64,3 +64,13 @@ do
    FOLDER=$(echo "$i" | cut -d "/" -f1)
    rsync -rlIpz --info=progress2 --temp-dir=~/tmp --delay-updates --ipv4 --exclude=.git -e 'ssh -o "StrictHostKeyChecking=no" -p 2222' "./$i" "$DEPLOY_BRANCH.$PANTHEON_PROJECT_ID@appserver.$DEPLOY_BRANCH.$PANTHEON_PROJECT_ID.drush.in:code/wp-content/$FOLDER"
 done
+
+commit_subject=$(git log -1 --pretty=format:%s)
+echo Commit subject: $commit_subject
+
+regex='Merge pull request #[0-9]+ from .+/(.+)$'
+[[ $commit_subject =~ $regex ]]
+branch_name=${BASH_REMATCH[1]}
+echo Merged branch: $branch_name
+
+# terminus env:commit --message MESSAGE
