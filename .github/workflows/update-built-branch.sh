@@ -53,21 +53,14 @@ rsync --delete -a "${SRC_DIR}/" "${BUILD_DIR}" --exclude='.git/'
 
 cd ${BUILD_DIR}/wp-content
 
-# declare -a arr=(
-#     "themes/my-theme" 
-#     "plugins/gutenberg"
-# )
+declare -a arr=(
+    "themes/my-theme" 
+    "plugins/gutenberg"
+)
 
-# ## now loop through the above array
-# for i in "${arr[@]}"
-# do
-#    FOLDER=$(echo "$i" | cut -d "/" -f1)
-#    rsync -rlIpz --info=progress2 --temp-dir=~/tmp --delay-updates --ipv4 --exclude=.git -e 'ssh -o "StrictHostKeyChecking=no" -p 2222' './${i}' '${DEPLOY_BRANCH}.${PANTHEON_PROJECT_ID}@appserver.${DEPLOY_BRANCH}.${PANTHEON_PROJECT_ID}.drush.in:code/wp-content/${FOLDER}'
-# done
-
-# rsync -rlIpz --info=progress2 --temp-dir=~/tmp --delay-updates --ipv4 --exclude=.git -e 'ssh -o "StrictHostKeyChecking=no" -p 2222' '.themes/my-theme' '${DEPLOY_BRANCH}.${PANTHEON_PROJECT_ID}@appserver.${DEPLOY_BRANCH}.${PANTHEON_PROJECT_ID}.drush.in:code/wp-content/themes'
-rsync -rlIpz --info=progress2 --temp-dir=~/tmp --delay-updates --ipv4 --exclude=.git -e 'ssh -o "StrictHostKeyChecking=no" -p 2222' './themes/my-theme' "$DEPLOY_BRANCH.$PANTHEON_PROJECT_ID@appserver.$DEPLOY_BRANCH.$PANTHEON_PROJECT_ID.drush.in:code/wp-content/themes"
-# mkdir -p ~/.ssh/ && touch ~/.ssh/known_hosts
-# echo "[appserver.dev.${PANTHEON_PROJECT_ID}.drush.in]:2222" > ~/.ssh/known_hosts
-# ssh -tt -o StrictHostKeyChecking=no appserver.${DEPLOY_BRANCH}.${PANTHEON_PROJECT_ID}.drush.in
-# terminus rsync ./my-theme ${PANTHEON_PROJECT_ID}.${DEPLOY_BRANCH}:code/wp-content/themes -- --info=progress2
+## now loop through the above array
+for i in "${arr[@]}"
+do
+   FOLDER=$(echo "$i" | cut -d "/" -f1)
+   rsync -rlIpz --info=progress2 --temp-dir=~/tmp --delay-updates --ipv4 --exclude=.git -e 'ssh -o "StrictHostKeyChecking=no" -p 2222' "./$i" "$DEPLOY_BRANCH.$PANTHEON_PROJECT_ID@appserver.$DEPLOY_BRANCH.$PANTHEON_PROJECT_ID.drush.in:code/wp-content/$FOLDER"
+done
