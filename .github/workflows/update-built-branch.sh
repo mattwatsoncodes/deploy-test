@@ -37,9 +37,9 @@ else
 fi
 
 cd "$SRC_DIR"
-COMMIT_SUBJECT="$(git log -1 --pretty=format:%s)"
+PR_TITLE="$(git log -1 --pretty=format:%b)"
 
-echo "$COMMIT_SUBJECT"
+echo "$PR_TITLE"
 
 # Copy the built files from src repo over to the build repo
 # ---------------------------------------------------------
