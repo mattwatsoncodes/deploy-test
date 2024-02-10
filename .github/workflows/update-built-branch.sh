@@ -39,8 +39,6 @@ fi
 cd "$SRC_DIR"
 PR_TITLE="$(git log -1 --pretty=format:%b)"
 
-echo "$PR_TITLE"
-
 # Copy the built files from src repo over to the build repo
 # ---------------------------------------------------------
 
@@ -70,4 +68,4 @@ do
    rsync -rlIpz --info=progress2 --temp-dir=~/tmp --delay-updates --ipv4 --exclude=.git -e 'ssh -o "StrictHostKeyChecking=no" -p 2222' "./$i" "$DEPLOY_BRANCH.$PANTHEON_PROJECT_ID@appserver.$DEPLOY_BRANCH.$PANTHEON_PROJECT_ID.drush.in:code/wp-content/$FOLDER"
 done
 
-# terminus env:commit --message MESSAGE
+terminus env:commit --message "$PR_TITLE"
