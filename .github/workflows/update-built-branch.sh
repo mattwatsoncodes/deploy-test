@@ -53,23 +53,23 @@ cd ${BUILD_DIR}/wp-content
 # A list of folders we want to selectively deploy
 # We don't want to deploy everything as other agencies are
 # also pushing plugins to this repo via SFTP.
-declare -a PATHS=(
+declare -a paths=(
     "themes/my-theme" 
     "plugins/gutenberg"
 )
 
 ## Loop through the paths array
-for PATH in "${PATHS[@]}"
+for path in "${paths[@]}"
 do
    # Get the root folder.
-   FOLDER=$(echo "$PATH" | cut -d "/" -f1)
+   FOLDER=$(echo "$path" | cut -d "/" -f1)
 
    # rsync the files with the following options:
    # -r - Recursively sync folders
    # -l - Recreate symlinks
    # -p - Set same permissions from source to destination
    # -z - Compress the files on sync
-   rsync -rlpz --info=progress2 --temp-dir=~/tmp --delay-updates --ipv4 --exclude=.git -e 'ssh -o "StrictHostKeyChecking=no" -p 2222' "./$PATH" "$DEPLOY_BRANCH.$PANTHEON_PROJECT_ID@appserver.$DEPLOY_BRANCH.$PANTHEON_PROJECT_ID.drush.in:code/wp-content/$FOLDER"
+   rsync -rlpz --info=progress2 --temp-dir=~/tmp --delay-updates --ipv4 --exclude=.git -e 'ssh -o "StrictHostKeyChecking=no" -p 2222' "./$path" "$DEPLOY_BRANCH.$PANTHEON_PROJECT_ID@appserver.$DEPLOY_BRANCH.$PANTHEON_PROJECT_ID.drush.in:code/wp-content/$paths"
 done
 
 # If we are on the dev branch, create a commit message with the PR Title (JIRA ID and Description)
