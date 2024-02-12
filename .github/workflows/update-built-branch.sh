@@ -67,9 +67,10 @@ do
    # rsync the files with the following options:
    # -r - Recursively sync folders
    # -l - Recreate symlinks
+   # -t - Sync time modification
    # -p - Set same permissions from source to destination
    # -z - Compress the files on sync
-   rsync -rlpz --info=progress2 --temp-dir=~/tmp --delay-updates --ipv4 --exclude=.git -e 'ssh -o "StrictHostKeyChecking=no" -p 2222' "./$path" "$DEPLOY_BRANCH.$PANTHEON_PROJECT_ID@appserver.$DEPLOY_BRANCH.$PANTHEON_PROJECT_ID.drush.in:code/wp-content/$paths"
+   rsync -rltpz --info=progress2 --temp-dir=~/tmp --delay-updates --ipv4 --exclude=.git -e 'ssh -o "StrictHostKeyChecking=no" -p 2222' "./$path" "$DEPLOY_BRANCH.$PANTHEON_PROJECT_ID@appserver.$DEPLOY_BRANCH.$PANTHEON_PROJECT_ID.drush.in:code/wp-content/$paths"
 done
 
 # If we are on the dev branch, create a commit message with the PR Title (JIRA ID and Description)
