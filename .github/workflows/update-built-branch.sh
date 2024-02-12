@@ -1,9 +1,6 @@
 #!/bin/bash -e
 #
-# Check in built assets from the current branch, and push them to a -built
-# branch in preparation for deploying to Pantheon
-#
-# Source and inspiration: https://github.com/Automattic/wpe-build-deploy/blob/master/deploy.sh
+# Build the assets and SFTP the files to the Pantheon environment.
 #
 
 set -ex
@@ -16,16 +13,8 @@ COMMIT_SHA=${GITHUB_SHA}
 SRC_DIR="${PWD}"
 BUILD_DIR="/tmp/pantheon-build-$(date +%s)"
 
-# If branch name matches an allowed pattern (JIRA ticket number, with up to 3
-# optional characters to differentiate different branches attached to the same
-# JIRA ticket), then push it to a Pantheon environment to build as a multidev
-# preview environment.
-DEPLOYABLE_BRANCH_PATTERN=^"([[:alpha:]]+-[[:digit:]]+)[^/]{0,4}"
-
-if [[ "$BRANCH" =~ $DEPLOYABLE_BRANCH_PATTERN ]]; then
-    DEPLOY_BRANCH=$( echo ${BASH_REMATCH[0]} | tr '[:upper:]' '[:lower:]' )
-# Deploy the "main" branch to Pantheon's "master" branch
-elif [ "$BRANCH" = "main" ]; then
+# Deploy the "main" branch to Pantheon's "dev" branch
+if [ "$BRANCH" = "main" ]; then
     DEPLOY_BRANCH="dev"
 # Deploy the "staging" branch to Pantheon's "qa" branch.
 elif [ "$BRANCH" = "staging" ]; then
@@ -37,6 +26,8 @@ else
 fi
 
 cd "$SRC_DIR"
+
+# Get the PR title from the merged branch so that we can create a commit.
 PR_TITLE="$(git log -1 --pretty=format:%b)"
 
 # Copy the built files from src repo over to the build repo
@@ -52,23 +43,36 @@ if ! command -v 'rsync'; then
 	$APT_GET_PREFIX apt-get install -q -y rsync
 fi
 
+echo "Syncing files... quietly"
+
 rsync --delete -a "${SRC_DIR}/" "${BUILD_DIR}" --exclude='.git/'
 
+# Into built wp-content
 cd ${BUILD_DIR}/wp-content
 
-declare -a arr=(
+# A list of folders we want to selectively deploy
+# We don't want to deploy everything as other agencies are
+# also pushing plugins to this repo via SFTP.
+declare -a PATHS=(
     "themes/my-theme" 
     "plugins/gutenberg"
 )
 
-## now loop through the above array
-for i in "${arr[@]}"
+## Loop through the paths array
+for PATH in "${PATHS[@]}"
 do
-   FOLDER=$(echo "$i" | cut -d "/" -f1)
-   rsync -rlIpz --info=progress2 --temp-dir=~/tmp --delay-updates --ipv4 --exclude=.git -e 'ssh -o "StrictHostKeyChecking=no" -p 2222' "./$i" "$DEPLOY_BRANCH.$PANTHEON_PROJECT_ID@appserver.$DEPLOY_BRANCH.$PANTHEON_PROJECT_ID.drush.in:code/wp-content/$FOLDER"
+   # Get the root folder.
+   FOLDER=$(echo "$PATH" | cut -d "/" -f1)
+
+   # rsync the files with the following options:
+   # -r - Recursively sync folders
+   # -l - Recreate symlinks
+   # -p - Set same permissions from source to destination
+   # -z - Compress the files on sync
+   rsync -rlpz --info=progress2 --temp-dir=~/tmp --delay-updates --ipv4 --exclude=.git -e 'ssh -o "StrictHostKeyChecking=no" -p 2222' "./$PATH" "$DEPLOY_BRANCH.$PANTHEON_PROJECT_ID@appserver.$DEPLOY_BRANCH.$PANTHEON_PROJECT_ID.drush.in:code/wp-content/$FOLDER"
 done
 
-# Only create commit message if on dev branch.
+# If we are on the dev branch, create a commit message with the PR Title (JIRA ID and Description)
 if [ "$DEPLOY_BRANCH" = "dev" ]; then
   terminus auth:login --machine-token=${PANTHEON_MACHINE_KEY}
   terminus env:commit --message "$PR_TITLE" -- "$PANTHEON_PROJECT_ID.$DEPLOY_BRANCH"
